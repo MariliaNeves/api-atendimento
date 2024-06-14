@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by  Marília
@@ -27,23 +26,11 @@ public class ServiceRequestService {
     private AttendantService attendantService;
     private static final int MAX_SERVICES_REQUESTS = 3;
     private MockUtil mockUtil;
-//    @Autowired
-//    private AttendantRepository attendantRepository; // TODO implementar repository
-
 
     public ServiceRequestService() {
         this.mockUtil = new MockUtil();
         this.attendantService = new AttendantService();
     }
-
-//    public List<ServiceRequestEntity> getAllServiceRequests() {
-//
-//        //return serviceRequestRepository.findAll(); // TODO implementar repository
-//    }
-
-//    public Optional<ServiceRequestEntity> getServiceRequestById(Long id) {
-//        return serviceRequestRepository.findById(id); TODO implementar
-//    }
 
     public ServiceRequestDTO createServiceRequest(ServiceRequestDTO dto) {
         ServiceRequestEntity entity = ConverterUtil.convertServiceRequestDTOToEntity(dto);
@@ -77,7 +64,7 @@ public class ServiceRequestService {
         if (attendantEntity != null) {
             entity.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
             entity.setAttendantEntity(attendantEntity);
-            //return serviceRequestRepository.save(entity); // TODO implementar repository
+
             if (attendantEntity.getServiceRequestEntity() != null) {
                 attendantEntity.getServiceRequestEntity().add(entity);
             } else {
@@ -89,26 +76,11 @@ public class ServiceRequestService {
             attendantService.updateAttendant(attendantEntity.getId(), attendantEntity);
         }else {
             entity.setServiceStatus(ServiceStatus.CRIADO);
-            //return serviceRequestRepository.save(entity); // TODO implementar repository
         }
         return ConverterUtil.convertServiceRequestEntityToDTO(entity);
 
     }
 
-//    public ServiceRequestEntity updateServiceRequest(Long id, ServiceRequestDTO serviceRequestDTODetails) {
-//        return serviceRequestRepository.findById(id) TODO implementar
-//                .map(serviceRequest -> {
-//                    serviceRequest.setName(serviceRequestDTODetails.getName());
-//                    serviceRequest.setServiceRequestEntity(null);
-//                    serviceRequest.setTeam(serviceRequestDetails.getTeam());
-//                    return serviceRequestRepository.save(serviceRequest);
-//                })
-//                .orElseThrow(() -> new RuntimeException("ServiceRequest not found"));
-//    }
-
-//    public void deleteServiceRequest(Long id) { TODO implementar
-//        serviceRequestRepository.deleteById(id);
-//    }
 }
 
 

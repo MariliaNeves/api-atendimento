@@ -8,6 +8,4 @@ import org.springframework.stereotype.Repository;
 public class AttendantRepository  {
 }
 
-//public interface AttendantRepository extends JpaRepository<AttendantEntity, Long> {
-//} TODO implementar
 

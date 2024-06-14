@@ -9,9 +9,5 @@ import org.springframework.stereotype.Repository;
 public class ServiceRequestRepository  {
 }
 
-//@Repository TODO implementar
-//public interface ServiceRequestRepository extends JpaRepository<ServiceRequestEntity, Long> {
-//}
-
 
 

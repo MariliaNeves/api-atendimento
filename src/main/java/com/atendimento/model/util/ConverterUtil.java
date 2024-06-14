@@ -63,7 +63,7 @@ public class ConverterUtil {
                     dto.setName(item.getName());
                     dto.setTeam(item.getTeam());
                     if(item.getServiceRequestEntity() != null){
-                        dto.setServiceRequestDTO(convertServiceRequestEntityToServiceRequestDTO(item.getServiceRequestEntity()));
+                        dto.setServiceRequestDTO(convertServiceRequestEntityToDTO(item.getServiceRequestEntity(), false));
                     }
                     return dto;
                 })
@@ -84,7 +84,7 @@ public class ConverterUtil {
         return dto;
     }
 
-    private static List<ServiceRequestDTO> convertServiceRequestEntityToServiceRequestDTO(List<ServiceRequestEntity> serviceRequests) {
+    public static List<ServiceRequestDTO> convertServiceRequestEntityToDTO(List<ServiceRequestEntity> serviceRequests, boolean getAttendant) {
         return serviceRequests.stream()
                 .map(item -> {
                     ServiceRequestDTO dto = new ServiceRequestDTO();
@@ -94,6 +94,9 @@ public class ConverterUtil {
                     dto.setSubject(item.getSubject());
                     dto.setDescription(item.getDescription());
                     dto.setServiceStatus(item.getServiceStatus());
+                    if (getAttendant && item.getAttendantEntity() != null){
+                        dto.setAttendantDTO(convertAttendantEntityToDTO(item.getAttendantEntity()));
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());

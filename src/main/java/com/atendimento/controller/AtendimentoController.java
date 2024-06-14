@@ -42,7 +42,7 @@ public class AtendimentoController {
 
     @GetMapping(value = "/serviceRequests")
     public ResponseEntity getServiceRequests(){
-        List<ServiceRequestDTO> dto = List.of();// = atendimentoService.getAllAttendants();
+        List<ServiceRequestDTO> dto = serviceRequestService.getAllServiceRequest();
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 

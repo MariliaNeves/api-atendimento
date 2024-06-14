@@ -6,7 +6,9 @@ import com.atendimento.model.entity.ServiceRequestEntity;
 import com.atendimento.model.enums.ServiceStatus;
 import com.atendimento.model.enums.Team;
 import com.atendimento.model.util.ConverterUtil;
+import com.atendimento.model.util.InvalidRequestException;
 import com.atendimento.model.util.MockUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,17 +24,24 @@ import java.util.List;
 @Service
 public class ServiceRequestService {
 
-
+    @Autowired
     private AttendantService attendantService;
     private static final int MAX_SERVICES_REQUESTS = 3;
     private MockUtil mockUtil;
 
     public ServiceRequestService() {
         this.mockUtil = new MockUtil();
-        this.attendantService = new AttendantService();
+        this.mockUtil.mockAttendantEntityComServiceRequests();
+        this.mockUtil.mockAttendantEntitySemServiceRequests();
+
     }
 
     public ServiceRequestDTO createServiceRequest(ServiceRequestDTO dto) {
+
+        if (dto.getDescription() == null) {
+            throw new InvalidRequestException("Description cannot be null");
+        }
+
         ServiceRequestEntity entity = ConverterUtil.convertServiceRequestDTOToEntity(dto);
         List<AttendantEntity> attendantEntityList = new ArrayList<>();
         switch (entity.getSubject()){
@@ -65,6 +74,7 @@ public class ServiceRequestService {
             entity.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
             entity.setAttendantEntity(attendantEntity);
 
+
             if (attendantEntity.getServiceRequestEntity() != null) {
                 attendantEntity.getServiceRequestEntity().add(entity);
             } else {
@@ -72,13 +82,18 @@ public class ServiceRequestService {
                 entities.add(entity);
                 attendantEntity.setServiceRequestEntity(entities);
             }
-            mockUtil.mockCreateServiceRequestEntity(entity);
-            attendantService.updateAttendant(attendantEntity.getId(), attendantEntity);
+            entity = mockUtil.mockCreateServiceRequestEntity(entity, attendantEntity);
+
         }else {
             entity.setServiceStatus(ServiceStatus.CRIADO);
+            mockUtil.mockCreateServiceRequestEntity(entity, attendantEntity);
         }
         return ConverterUtil.convertServiceRequestEntityToDTO(entity);
 
+    }
+
+    public List<ServiceRequestDTO> getAllServiceRequest() {
+        return ConverterUtil.convertServiceRequestEntityToDTO(mockUtil.getServiceRequestEntityList(), true);
     }
 
 }

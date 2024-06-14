@@ -9,6 +9,7 @@ import com.atendimento.model.enums.Team;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class MockUtil {
 
@@ -21,117 +22,124 @@ public class MockUtil {
     }
 
     public AttendantEntity mockCreateAttendantEntity(AttendantEntity entity) {
-        Long id = (long)this.attendantEntityList.size()+1;
+        Long id = (long)getAttendantEntityList().size()+1;
         entity.setId(id.longValue());
-        this.attendantEntityList.add(entity);
+        getAttendantEntityList().add(entity);
         return entity;
     }
 
     public AttendantEntity mockUpdateAttendantEntity(Long id, AttendantEntity entity) {
-        this.attendantEntityList.add(entity);
-        return entity;
+
+        Optional<AttendantEntity> optionalAttendant = getAttendantEntityList().stream()
+                .filter(item -> item.getId().equals(id))
+                .findFirst();
+
+        AttendantEntity updatedEntity = null;
+
+        if (optionalAttendant.isPresent()) {
+            int index = getAttendantEntityList().indexOf(optionalAttendant.get());
+            getAttendantEntityList().remove(entity);
+            getAttendantEntityList().add(entity);
+            updatedEntity = getAttendantEntityList().get(index);
+        }
+
+        for(AttendantEntity item : getAttendantEntityList()){
+            if(item.getId().equals(id)){
+                item.setServiceRequestEntity(entity.getServiceRequestEntity());
+                break;
+            }
+        }
+
+        return updatedEntity;
     }
 
-    public ServiceRequestEntity mockCreateServiceRequestEntity(ServiceRequestEntity entity) {
-        Long id = (long)this.serviceRequestEntityList.size()+1;
-        entity.setId(id.longValue());
-        this.serviceRequestEntityList.add(entity);
-        return entity;
+    public ServiceRequestEntity mockCreateServiceRequestEntity(ServiceRequestEntity entity, AttendantEntity attendantEntity) {
+        ServiceRequestEntity serviceRequest = new ServiceRequestEntity();
+        if (entity!= null && attendantEntity != null){
+
+            Long id = (long)getServiceRequestEntityList().size()+1;
+            entity.setId(id.longValue());
+            getServiceRequestEntityList().add(entity);
+
+            if(attendantEntity != null)
+                mockUpdateAttendantEntity(attendantEntity.getId(), attendantEntity);
+
+            Optional<ServiceRequestEntity> optionalAttendant = getServiceRequestEntityList().stream()
+                    .filter(item -> item.getId().equals(entity.getId()))
+                    .findFirst();
+            serviceRequest = optionalAttendant.get();
+
+        }
+
+        return serviceRequest;
     }
 
     public List<AttendantEntity> mockAttendantEntitySemServiceRequests() {
 
-        // Criação de AttendantEntity
         AttendantEntity attendant = new AttendantEntity();
         attendant.setId(1L);
         attendant.setName("Luiza");
         attendant.setTeam(Team.CARTOES);
-        this.attendantEntityList.add(attendant);
-
-        attendant = new AttendantEntity();
-        attendant.setId(2L);
-        attendant.setName("Joao");
-        attendant.setTeam(Team.EMPRESTIMOS);
-
-        attendant = new AttendantEntity();
-        attendant.setId(3L);
-        attendant.setName("Joao");
-        attendant.setTeam(Team.OUTROS_ASSUNTOS);
-
-        attendant = new AttendantEntity();
-        attendant.setId(4L);
-        attendant.setName("Joao");
-        attendant.setTeam(Team.CARTOES);
-
+        getAttendantEntityList().add(attendant);
         return attendantEntityList;
 
     }
 
     public  List<AttendantEntity> mockAttendantEntityComServiceRequests() {
-        Result result = getServiceRequestEntitys();
+        getServiceRequestEntitys();
 
-        // Criação de AttendantEntity
         AttendantEntity attendant1 = new AttendantEntity();
         attendant1.setId(2L);
         attendant1.setName("Joao");
         attendant1.setTeam(Team.EMPRESTIMOS);
-        attendant1.setServiceRequestEntity(result.serviceRequests());
+        attendant1.setServiceRequestEntity(getServiceRequestEntityList());
 
-        // Vinculação das solicitações de serviço com o atendente
-        result.serviceRequest1().setAttendantEntity(attendant1);
-        result.serviceRequest2().setAttendantEntity(attendant1);
-        result.serviceRequest3().setAttendantEntity(attendant1);
+        getServiceRequestEntityList().get(0).setAttendantEntity(attendant1);
+        getServiceRequestEntityList().get(1).setAttendantEntity(attendant1);
+        getServiceRequestEntityList().get(2).setAttendantEntity(attendant1);
 
-        // Criação do Optional<AttendantEntity>
-        this.attendantEntityList.add(attendant1);
-        return this.attendantEntityList;
+        getAttendantEntityList().add(attendant1);
+        return getAttendantEntityList();
 
     }
 
-    private Result getServiceRequestEntitys() {
-        ServiceRequestEntity serviceRequest1 = new ServiceRequestEntity();
-        serviceRequest1.setId(1L);
-        serviceRequest1.setCreateAt(new Date());
-        serviceRequest1.setUpdateAt(new Date());
-        serviceRequest1.setDescription("uigwefuigqwieufg");
-        serviceRequest1.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
-        serviceRequest1.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+    public void getServiceRequestEntitys() {
+        ServiceRequestEntity serviceRequest = new ServiceRequestEntity();
+        serviceRequest.setId(1L);
+        serviceRequest.setCreateAt(new Date());
+        serviceRequest.setUpdateAt(new Date());
+        serviceRequest.setDescription("uigwefuigqwieufg");
+        serviceRequest.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
+        serviceRequest.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+        getServiceRequestEntityList().add(serviceRequest);
 
-        ServiceRequestEntity serviceRequest2 = new ServiceRequestEntity();
-        serviceRequest2.setId(2L);
-        serviceRequest2.setCreateAt(new Date());
-        serviceRequest2.setUpdateAt(new Date());
-        serviceRequest2.setDescription("310847r138047fvc8y38v");
-        serviceRequest2.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
-        serviceRequest2.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+        serviceRequest = new ServiceRequestEntity();
+        serviceRequest.setId(2L);
+        serviceRequest.setCreateAt(new Date());
+        serviceRequest.setUpdateAt(new Date());
+        serviceRequest.setDescription("310847r138047fvc8y38v");
+        serviceRequest.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
+        serviceRequest.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+        getServiceRequestEntityList().add(serviceRequest);
 
-        ServiceRequestEntity serviceRequest3 = new ServiceRequestEntity();
-        serviceRequest3.setId(3L);
-        serviceRequest3.setCreateAt(new Date());
-        serviceRequest3.setUpdateAt(new Date());
-        serviceRequest3.setDescription("9nb3149thg4385bgvf");
-        serviceRequest3.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
-        serviceRequest3.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+        serviceRequest = new ServiceRequestEntity();
+        serviceRequest.setId(3L);
+        serviceRequest.setCreateAt(new Date());
+        serviceRequest.setUpdateAt(new Date());
+        serviceRequest.setDescription("9nb3149thg4385bgvf");
+        serviceRequest.setSubject(Subject.CONTRATACAO_DE_EMPRESTIMO);
+        serviceRequest.setServiceStatus(ServiceStatus.EM_ATENDIMENTO);
+        getServiceRequestEntityList().add(serviceRequest);
 
-        // Lista de ServiceRequestEntity
 
-        this.serviceRequestEntityList.add(serviceRequest1);
-        this.serviceRequestEntityList.add(serviceRequest2);
-        this.serviceRequestEntityList.add(serviceRequest3);
-        Result result = new Result(serviceRequest1, serviceRequest2, serviceRequest3, this.serviceRequestEntityList);
-        return result;
-    }
-
-    private record Result(ServiceRequestEntity serviceRequest1, ServiceRequestEntity serviceRequest2,
-                          ServiceRequestEntity serviceRequest3, List<ServiceRequestEntity> serviceRequests) {
     }
 
     public List<AttendantEntity> getAttendantEntityList() {
-        return attendantEntityList;
+        return this.attendantEntityList;
     }
 
     public List<ServiceRequestEntity> getServiceRequestEntityList() {
-        return serviceRequestEntityList;
+        return this.serviceRequestEntityList;
     }
 }
 

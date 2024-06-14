@@ -4,6 +4,7 @@ import com.atendimento.model.dto.AttendantDTO;
 import com.atendimento.model.entity.AttendantEntity;
 import com.atendimento.model.enums.Team;
 import com.atendimento.model.util.ConverterUtil;
+import com.atendimento.model.util.InvalidRequestException;
 import com.atendimento.model.util.MockUtil;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +20,11 @@ import java.util.List;
 public class AttendantService {
 
     private MockUtil mockUtil;
-    List<AttendantEntity> attendantEntityList;
 
     public AttendantService() {
         this.mockUtil = new MockUtil();
         this.mockUtil.mockAttendantEntitySemServiceRequests();
-        attendantEntityList = this.mockUtil.mockAttendantEntityComServiceRequests();
+        this.mockUtil.mockAttendantEntityComServiceRequests();
     }
 
     public List<AttendantDTO> getAllAttendants() {
@@ -33,16 +33,19 @@ public class AttendantService {
     }
 
     public List<AttendantEntity> getAllAttendantByTeam(Team team) {
-        return mockUtil.mockAttendantEntityComServiceRequests();
+        return mockUtil.getAttendantEntityList();
     }
 
     public AttendantDTO createAttendant(AttendantDTO attendant) {
+        if (attendant.getName() == null) {
+            throw new InvalidRequestException("Name cannot be null");
+        }
+
+        if (attendant.getTeam() == null) {
+            throw new InvalidRequestException("Team cannot be null");
+        }
         AttendantEntity entity = mockUtil.mockCreateAttendantEntity(ConverterUtil.convertAttendantDTOToAttendantEntity(attendant));
         return ConverterUtil.convertAttendantEntityToDTO(entity);
-    }
-
-    public AttendantEntity updateAttendant(Long id, AttendantEntity entity) {
-        return entity;
     }
 
 }

@@ -1,0 +1,9 @@
+spring:
+
+  queue-service-name: "service-request.v1.service-created"
+  queue-attendants-name: "attendants.v1.attendant-created"
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: rabbitmq
+    password: rabbitmqpws

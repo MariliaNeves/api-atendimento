@@ -1,14 +1,16 @@
 package com.atendimento.services;
 
+
 import com.atendimento.model.dto.AttendantDTO;
-import com.atendimento.model.entity.AttendantEntity;
 import com.atendimento.model.enums.Team;
-import com.atendimento.model.util.ConverterUtil;
 import com.atendimento.model.util.InvalidRequestException;
 import com.atendimento.model.util.MockUtil;
+import com.atendimento.model.util.QueueManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by  Marília
@@ -20,32 +22,36 @@ import java.util.List;
 public class AttendantService {
 
     private MockUtil mockUtil;
+    @Autowired
+    private QueueManager queueManager;
+
 
     public AttendantService() {
         this.mockUtil = new MockUtil();
-        this.mockUtil.mockAttendantEntitySemServiceRequests();
-        this.mockUtil.mockAttendantEntityComServiceRequests();
     }
 
     public List<AttendantDTO> getAllAttendants() {
-        List<AttendantEntity> entities = mockUtil.getAttendantEntityList();
-        return ConverterUtil.convertAttendantEntityListToDTO(entities);
+        return queueManager.getAttendantQueue();
     }
 
-    public List<AttendantEntity> getAllAttendantByTeam(Team team) {
-        return mockUtil.getAttendantEntityList();
+    public List<AttendantDTO> getAllAttendantByTeam(Team team) {
+        List<AttendantDTO> attendantDTOList = queueManager.getAttendantQueue();
+
+        return attendantDTOList.stream()
+                .filter(item -> item.getTeam().equals(team))
+                .collect(Collectors.toList());
     }
 
-    public AttendantDTO createAttendant(AttendantDTO attendant) {
-        if (attendant.getName() == null) {
+    public AttendantDTO createAttendant(AttendantDTO dto) {
+        if (dto.getName() == null) {
             throw new InvalidRequestException("Name cannot be null");
         }
 
-        if (attendant.getTeam() == null) {
+        if (dto.getTeam() == null) {
             throw new InvalidRequestException("Team cannot be null");
         }
-        AttendantEntity entity = mockUtil.mockCreateAttendantEntity(ConverterUtil.convertAttendantDTOToAttendantEntity(attendant));
-        return ConverterUtil.convertAttendantEntityToDTO(entity);
+        return queueManager.addAttendantQueue(dto);
+
     }
 
 }

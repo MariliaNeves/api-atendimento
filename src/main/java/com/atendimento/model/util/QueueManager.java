@@ -3,8 +3,11 @@ package com.atendimento.model.util;
 import com.atendimento.model.dto.AttendantDTO;
 import com.atendimento.model.dto.ServiceRequestDTO;
 import jakarta.annotation.PostConstruct;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -65,11 +68,16 @@ public class QueueManager {
     public List<ServiceRequestDTO> getServiceRequestQueue() {
         List<ServiceRequestDTO> serviceRequestList = new ArrayList<>();
 
-        ServiceRequestDTO serviceRequestDTO;
-        while ((serviceRequestDTO = (ServiceRequestDTO) rabbitTemplate.receiveAndConvert(QUEUE_SERVICE_NAME)) != null) {
-            serviceRequestList.add(serviceRequestDTO);
+        try {
+            ServiceRequestDTO serviceRequestDTO;
+            while ((serviceRequestDTO = (ServiceRequestDTO) rabbitTemplate.receiveAndConvert(QUEUE_SERVICE_NAME)) != null) {
+                serviceRequestList.add(serviceRequestDTO);
+            }
+            serviceRequestList.forEach(item -> rabbitTemplate.convertAndSend(QUEUE_SERVICE_NAME, item));
+        }catch (Exception e){
+            System.out.println("fila ainda n exist");
         }
-        serviceRequestList.forEach(item -> rabbitTemplate.convertAndSend(QUEUE_SERVICE_NAME, item));
+
         return serviceRequestList;
     }
 
@@ -77,12 +85,26 @@ public class QueueManager {
     public List<AttendantDTO> getAttendantQueue() {
         List<AttendantDTO> attendantDTOList = new ArrayList<>();
 
-        AttendantDTO attendantDTO;
-        while ((attendantDTO = (AttendantDTO) rabbitTemplate.receiveAndConvert(QUEUE_ATTENDANTS_NAME)) != null) {
-            attendantDTOList.add(attendantDTO);
+        try {
+            AttendantDTO attendantDTO;
+            while ((attendantDTO = (AttendantDTO) rabbitTemplate.receiveAndConvert(QUEUE_ATTENDANTS_NAME)) != null) {
+                attendantDTOList.add(attendantDTO);
+            }
+            attendantDTOList.forEach(item -> rabbitTemplate.convertAndSend(QUEUE_ATTENDANTS_NAME, item));
+        }catch (Exception e){
+            System.out.println("fila ainda n exist");
         }
-        attendantDTOList.forEach(item -> rabbitTemplate.convertAndSend(QUEUE_ATTENDANTS_NAME, item));
+
         return attendantDTOList;
     }
 
+//    @RabbitListener(queues = QUEUE_ATTENDANTS_NAME)
+//    public  void onAttendantCreated(AttendantDTO dto){
+//        System.out.println("ids :"+dto.getId());
+//    }
+//
+//    @RabbitListener(queues = QUEUE_ATTENDANTS_NAME)
+//    public  void onServiceRequestCreated(ServiceRequestDTO dto){
+//        System.out.println("ids :"+dto.getId());
+//    }
 }

@@ -49,6 +49,13 @@ public class AttendantDTO implements Serializable {
         return serviceRequestDTO;
     }
 
+    public AttendantDTO() {}
+
+    public AttendantDTO(String name, Team team) {
+        this.name = name;
+        this.team = team;
+    }
+
     public void setServiceRequestDTO(List<ServiceRequestDTO> serviceRequestDTO) {
         this.serviceRequestDTO = serviceRequestDTO;
     }
